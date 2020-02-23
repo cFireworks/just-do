@@ -29,7 +29,7 @@
 <center>![alt text](../img/Java一二03.png "Java容器类库")</center>
     
   
-###### <a name="JC.01">1.ArrayList</a>
+#### <a name="JC.01">1.ArrayList</a>
 底层数据结构：`Object[]`。  
   
 默认数组容量：10。  
@@ -89,7 +89,7 @@ public ArrayList() {
 }
 ```
   
-###### <a name="JC.02">2.LinkedList</a>
+#### <a name="JC.02">2.LinkedList</a>
 底层数据结构：`双向链表`。  
 > 参考源码
   
@@ -137,7 +137,7 @@ Node<E> node(int index) {
   
 迭代器遍历：`listIterator(index)`方法返回内部类`ListItr`对象，支持`hasPrevious()`、`hasNext()`遍历，同时支持`add()`、`set()`、`remove()`操作。同样包含`快速失败`检查。  
   
-###### <a name="JC.03">3.Vector</a>
+#### <a name="JC.03">3.Vector</a>
 > 取自类注释（基本就是，这个类能不用就不用，设计的同步粒度太大了，降低性能啊！）
   
 ```java
@@ -164,7 +164,7 @@ Node<E> node(int index) {
   
 迭代器遍历：参见`ArrayList`部分。  
   
-###### <a name="JC.04">4.Stack</a>
+#### <a name="JC.04">4.Stack</a>
 > 截取一段源码注释吧，我什么都不说了，只说一点`Stack`继承`Vector`
   
 ```java
@@ -180,7 +180,7 @@ Node<E> node(int index) {
 */
 ```
   
-###### <a name="JC.05">5.HashSet</a>
+#### <a name="JC.05">5.HashSet</a>
 底层数据结构：`HashMap`。  
   
 默认容量：16；扩容因子：0.75。  
@@ -238,7 +238,7 @@ public Iterator<E> iterator() {
 }
 ```
   
-###### <a name="JC.06">6.TreeSet</a>
+#### <a name="JC.06">6.TreeSet</a>
 `TreeSet`和`HashSet`的主要不同在于`TreeSet`对排序的支持。  
   
 底层数据结构：`TreeMap`。  
@@ -254,10 +254,10 @@ public TreeSet() {
   
 `TreeSet`增加了对排序方面的支持：比如可指定`Comparator`实现（其实也是设置的`TreeMap`）。  
   
-###### <a name="JC.07">7.LinkedHashSet</a>
+#### <a name="JC.07">7.LinkedHashSet</a>
 忽悠人的家货，直接继承`HashSet`，然后啥新特性都没有，叫`Linked`就是忽悠人。  
 
-###### <a name="JC.08">8.HashMap</a>
+#### <a name="JC.08">8.HashMap</a>
 底层数据结构：数组+单向链表（用于解决hash碰撞，链表法）。
 > 解决哈希碰撞的方法一般有：开放定址法、链地址法（拉链法）、再哈希法、建立公共溢出区等方法：
 > 1. **开放定址法**:从发生冲突的那个单元起，按照一定的次序，从哈希表中找到一个空闲的单元。然后把发生冲突的元素存入到该单元。
@@ -544,7 +544,7 @@ static final Entry<?,?>[] EMPTY_TABLE = {};
 transient Entry<K,V>[] table = (Entry<K,V>[]) EMPTY_TABLE;
 ```
   
-###### <a name="JC.09">9.HashTable</a>
+#### <a name="JC.09">9.HashTable</a>
 底层数据结构：和`HashMap`一样，数组+单向链表（用于解决hash碰撞，链表法）。  
   
 和`Vector`问题一样，为了线程安全，同步锁粒度太大，不推荐用了！  
@@ -568,7 +568,7 @@ transient Entry<K,V>[] table = (Entry<K,V>[]) EMPTY_TABLE;
 */
 ```
   
-###### <a name="JC.10">10.TreeMap</a>
+#### <a name="JC.10">10.TreeMap</a>
 底层数据结构：红黑树。  
 > 源码
   
@@ -695,7 +695,7 @@ final class KeyIterator extends PrivateEntryIterator<K> {
 ...
 ```
   
-###### <a name="JC.11">11.LinkedHashMap</a>
+#### <a name="JC.11">11.LinkedHashMap</a>
 底层数据结构：继承`HashMap`，但是创建双链表保存`HashMap`中的`key-value`对，通过重写父类相关方法，修改双链表，目的在于迭代器遍历，输出有序（支持`插入顺序`、`访问顺序`）。  
 > 源码
   
@@ -769,7 +769,7 @@ private class EntryIterator extends LinkedHashIterator<Map.Entry<K,V>> {
 }
 ```
   
-###### <a name="JC.12">12.非线程安全容器类小节</a>
+#### <a name="JC.12">12.非线程安全容器类小节</a>
 上文描述容器类，绝大多数都不是线程安全的，多线程环境下涉及迭代器遍历都可能发生`fast-fail`错误。如何实现线程安全的支持？  
   
 一种方式是，`Collections`类包含相当多的静态方法，用于把上述容器类封装为线程安全的容器类（`适配器模式`），比如`synchronizedMap`、`unmodifiableMap`。`synchronizedMap`是对读写操作加同步锁，`unmodifiableMap`直接只许读不许写。  
@@ -802,7 +802,7 @@ private static class SynchronizedMap<K,V> implements Map<K,V>, Serializable {
   
 那么高并发场合，有哪些专用集合类呢？下文分解。  
   
-###### <a name="JC.13">13.ConcurrentHashMap</a>
+#### <a name="JC.13">13.ConcurrentHashMap</a>
 底层数据结构：`Segment`数组（用于分段加锁），其中每一个`Segment`相当于一个`HashMap`，包含一个存放`key-value`的数组`HashEntry`。  
   
 默认参数：`loadFactor`=0.75，`concurrencyLevel`=16（用于确定`Segment`数组大小），`initialCapacity`=16（与`concurrencyLevel`一起确定每一个`Segment`中`HashEntry`数组大小）。  
@@ -1011,7 +1011,7 @@ public int size() {
 }
 ```
   
-###### <a name="JC.14">14.CopyOnWriteArrayList</a>
+#### <a name="JC.14">14.CopyOnWriteArrayList</a>
 读时不加锁，写时写入副本，写完切换数组引用。  
   
 底层数据结构：Object[]。  
@@ -1096,7 +1096,7 @@ private E get(Object[] a, int index) {
 }
 ```
   
-###### <a name="JC.15">15.CopyOnWriteArraySet</a>
+#### <a name="JC.15">15.CopyOnWriteArraySet</a>
 基于对`CopyOnWriteArrayList`的封装。  
 > 源码
   
@@ -1143,7 +1143,7 @@ public boolean addIfAbsent(E e) {
 }
 ```
   
-###### <a name="JC.16">16.ArrayBlockingQueue</a>
+#### <a name="JC.16">16.ArrayBlockingQueue</a>
 底层数据结构：Object[]，双指针`putIndex`、`takeIndex`（循环递增），先进先出，线程安全。  
 > 源码
   
@@ -1275,7 +1275,7 @@ public E take() throws InterruptedException {
 }
 ```
   
-###### <a name="JC.17">17.LinkedBlockingQueue</a>
+#### <a name="JC.17">17.LinkedBlockingQueue</a>
 底层数据结构：单向链表，头指针，尾指针，入队锁（用于入队操作加锁），出队锁（用于出队操作加锁）。  
 > 源码
   
