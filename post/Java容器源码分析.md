@@ -811,7 +811,7 @@ private static class SynchronizedMap<K,V> implements Map<K,V>, Serializable {
 那么高并发场合，有哪些专用集合类呢？下文分解。  
   
 ### <a name="JC.13">13.ConcurrentHashMap</a>
-HashMap, HashTable, ConcurrentHashTable比较
+**HashMap, HashTable, ConcurrentHashTable比较**
 * 线程不安全的`HashMap`  
 多线程环境下，使用`HashMap`进行`put`操作会引起死循环，导致`CPU`利用率接近100%  
 > 参见：[不正当使用HashMap导致cpu 100%的问题追究][4]，原因为多线程下`HashMap`扩容，可能会创建出两个新数组容器，造成链表闭环，导致死循环  
@@ -832,10 +832,12 @@ HashMap, HashTable, ConcurrentHashTable比较
 
   `ConcurrentHashMap`结构图  
 ![alt text](../img/ConcurrentHashMap结构图.jpg "类图") 
+
 底层数据结构：`Segment`数组（用于分段加锁），其中每一个`Segment`相当于一个`HashMap`，包含一个存放`key-value`的数组`HashEntry`。  
   
 默认参数：`loadFactor`=0.75，`concurrencyLevel`=16（用于确定`Segment`数组大小），`initialCapacity`=16（与`concurrencyLevel`一起确定每一个`Segment`中`HashEntry`数组大小）。  
-> 源码
+
+> `ConcurrentHashMap`源码
   
 ```java
 public ConcurrentHashMap(int initialCapacity,
