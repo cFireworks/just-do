@@ -1,18 +1,23 @@
 ## Java容器源码分析
 
 ### 目录
+### [一、List接口](./Java容器源码分析.md#JC.1)
 * [ArrayList](./Java容器源码分析.md#JC.01)
 * [LinkedList](./Java容器源码分析.md#JC.02)
 * [Vector](./Java容器源码分析.md#JC.03)
 * [Stack](./Java容器源码分析.md#JC.04)
+### [二、Set接口](./Java容器源码分析.md#JC.2)
 * [HashSet](./Java容器源码分析.md#JC.05)
 * [TreeSet](./Java容器源码分析.md#JC.06)
 * [LinkedHashSet](./Java容器源码分析.md#JC.07)
+### [三、Map接口](./Java容器源码分析.md#JC.3)
 * [HashMap](./Java容器源码分析.md#JC.08)
 * [HashTable](./Java容器源码分析.md#JC.09)
 * [TreeMap](./Java容器源码分析.md#JC.10)
 * [LinkedHashMap](./Java容器源码分析.md#JC.11)
+### [四、非线程安全容器类](./Java容器源码分析.md#JC.12)
 * [非线程安全容器类小节](./Java容器源码分析.md#JC.12)
+### [五、线程安全容器类](./Java容器源码分析.md#JC.5)
 * [ConcurrentHashMap](./Java容器源码分析.md#JC.13)
 * [CopyOnWriteArrayList](./Java容器源码分析.md#JC.14)
 * [CopyOnWriteArraySet](./Java容器源码分析.md#JC.15)
@@ -22,14 +27,14 @@
 > 写在前面的三点：  
 > 1. JDK容器类每天都用，但若没有把握好每一种容器适用的场景，不加选择的滥用，很可能你就会落入性能的坑，并发的坑，等等一系列坑，研究容器源码就是避坑的捷径；  
 > 2. 文章基于JDK 1.7某一子版本源码分析，每一次JDK更新，容器类会有或大或小的变动，文章未覆盖最新JDK 8源码，但分析的各容器类实现机制任适用JDK 8；  
-> 3. 文章对JDK跳跃表容器类`ConcurrentSkipListMap`、`ConcurrentSkipListSet`未分析，后续补充；  
+> 3. 文章对JDK跳跃表容器类 `ConcurrentSkipListMap`、`ConcurrentSkipListSet` 未分析，后续补充； 
 
-#### Java Container容器
+### Java Container容器
   
-<center>![alt text](../img/Java一二03.png "Java容器类库")</center>
+![alt text](../img/Java一二03.png "Java容器类库")
     
-  
-#### <a name="JC.01">1.ArrayList</a>
+### 一、<a name="JC.1">List接口</a>
+### <a name="JC.01">1.ArrayList</a>
 底层数据结构：`Object[]`。  
   
 默认数组容量：10。  
@@ -89,7 +94,7 @@ public ArrayList() {
 }
 ```
   
-#### <a name="JC.02">2.LinkedList</a>
+### <a name="JC.02">2.LinkedList</a>
 底层数据结构：`双向链表`。  
 > 参考源码
   
@@ -137,7 +142,7 @@ Node<E> node(int index) {
   
 迭代器遍历：`listIterator(index)`方法返回内部类`ListItr`对象，支持`hasPrevious()`、`hasNext()`遍历，同时支持`add()`、`set()`、`remove()`操作。同样包含`快速失败`检查。  
   
-#### <a name="JC.03">3.Vector</a>
+### <a name="JC.03">3.Vector</a>
 > 取自类注释（基本就是，这个类能不用就不用，设计的同步粒度太大了，降低性能啊！）
   
 ```java
@@ -164,7 +169,7 @@ Node<E> node(int index) {
   
 迭代器遍历：参见`ArrayList`部分。  
   
-#### <a name="JC.04">4.Stack</a>
+### <a name="JC.04">4.Stack</a>
 > 截取一段源码注释吧，我什么都不说了，只说一点`Stack`继承`Vector`
   
 ```java
@@ -179,8 +184,8 @@ Node<E> node(int index) {
 ...
 */
 ```
-  
-#### <a name="JC.05">5.HashSet</a>
+### <a name="JC.2">二、Set接口</a>
+### <a name="JC.05">5.HashSet</a>
 底层数据结构：`HashMap`。  
   
 默认容量：16；扩容因子：0.75。  
@@ -238,7 +243,7 @@ public Iterator<E> iterator() {
 }
 ```
   
-#### <a name="JC.06">6.TreeSet</a>
+### <a name="JC.06">6.TreeSet</a>
 `TreeSet`和`HashSet`的主要不同在于`TreeSet`对排序的支持。  
   
 底层数据结构：`TreeMap`。  
@@ -252,12 +257,15 @@ public TreeSet() {
   
 `put`、`remove`、`iterator`：类同于`HashSet`部分。  
   
-`TreeSet`增加了对排序方面的支持：比如可指定`Comparator`实现（其实也是设置的`TreeMap`）。  
+`TreeSet`调用集合元素的`Comparator(Object obj)`方法来比较元素之间大小关系，然后将集合元素按升序排列，这种方式就是自然排序。（其实也是设置的`TreeMap`）。  
   
-#### <a name="JC.07">7.LinkedHashSet</a>
+### <a name="JC.07">7.LinkedHashSet</a>
 忽悠人的家货，直接继承`HashSet`，然后啥新特性都没有，叫`Linked`就是忽悠人。  
 
-#### <a name="JC.08">8.HashMap</a>
+
+
+### <a name="JC.3">三、Map接口</a>
+### <a name="JC.08">8.HashMap</a>
 底层数据结构：数组+单向链表（用于解决hash碰撞，链表法）。
 > 解决哈希碰撞的方法一般有：开放定址法、链地址法（拉链法）、再哈希法、建立公共溢出区等方法：
 > 1. **开放定址法**:从发生冲突的那个单元起，按照一定的次序，从哈希表中找到一个空闲的单元。然后把发生冲突的元素存入到该单元。
@@ -544,7 +552,7 @@ static final Entry<?,?>[] EMPTY_TABLE = {};
 transient Entry<K,V>[] table = (Entry<K,V>[]) EMPTY_TABLE;
 ```
   
-#### <a name="JC.09">9.HashTable</a>
+### <a name="JC.09">9.HashTable</a>
 底层数据结构：和`HashMap`一样，数组+单向链表（用于解决hash碰撞，链表法）。  
   
 和`Vector`问题一样，为了线程安全，同步锁粒度太大，不推荐用了！  
@@ -568,7 +576,7 @@ transient Entry<K,V>[] table = (Entry<K,V>[]) EMPTY_TABLE;
 */
 ```
   
-#### <a name="JC.10">10.TreeMap</a>
+### <a name="JC.10">10.TreeMap</a>
 底层数据结构：红黑树。  
 > 源码
   
@@ -695,7 +703,7 @@ final class KeyIterator extends PrivateEntryIterator<K> {
 ...
 ```
   
-#### <a name="JC.11">11.LinkedHashMap</a>
+### <a name="JC.11">11.LinkedHashMap</a>
 底层数据结构：继承`HashMap`，但是创建双链表保存`HashMap`中的`key-value`对，通过重写父类相关方法，修改双链表，目的在于迭代器遍历，输出有序（支持`插入顺序`、`访问顺序`）。  
 > 源码
   
@@ -769,7 +777,7 @@ private class EntryIterator extends LinkedHashIterator<Map.Entry<K,V>> {
 }
 ```
   
-#### <a name="JC.12">12.非线程安全容器类小节</a>
+### <a name="JC.12">四、非线程安全容器类小节</a>
 上文描述容器类，绝大多数都不是线程安全的，多线程环境下涉及迭代器遍历都可能发生`fast-fail`错误。如何实现线程安全的支持？  
   
 一种方式是，`Collections`类包含相当多的静态方法，用于把上述容器类封装为线程安全的容器类（`适配器模式`），比如`synchronizedMap`、`unmodifiableMap`。`synchronizedMap`是对读写操作加同步锁，`unmodifiableMap`直接只许读不许写。  
@@ -797,12 +805,33 @@ private static class SynchronizedMap<K,V> implements Map<K,V>, Serializable {
     ...
 }
 ```
-  
+### <a name="JC.5">五、线程安全容器类小节</a>
 `Collections`类中含有`SynchroniezdList`、`SynchroniezdSet`、`SynchroniezdMap`、`UnmodifiableList`、`UnmodifiableSet`、`UnmodifiableMap`等。可以看出这样的`锁粒度`是很大的，直接对集合`整体加锁`，通常性能在高并发时下降迅速。  
   
 那么高并发场合，有哪些专用集合类呢？下文分解。  
   
-#### <a name="JC.13">13.ConcurrentHashMap</a>
+### <a name="JC.13">13.ConcurrentHashMap</a>
+HashMap, HashTable, ConcurrentHashTable比较
+* 线程不安全的`HashMap`  
+多线程环境下，使用`HashMap`进行`put`操作会引起死循环，导致`CPU`利用率接近100%  
+> 参见：[不正当使用HashMap导致cpu 100%的问题追究][4]，原因为多线程下`HashMap`扩容，可能会创建出两个新数组容器，造成链表闭环，导致死循环  
+
+* 效率低下的`HashTable`  
+使用`synchronized`保证线程安全  
+线程竞争激烈情况下效率非常低下  
+
+* `ConcurrentHashMap`的锁分段技术  
+锁分拆技术(lock spliting)  
+锁分离技术(lock striping)  
+> 分拆锁(lock spliting)就是若原先的程序中多处逻辑都采用同一个锁，但各个逻辑之间又相互独立，就可以拆(Spliting)为使用多个锁，每个锁守护不同的逻辑。分拆锁有时候可以被扩展，分成可大可小加锁块的集合，并且它们归属于相互独立的对象，这样的情况就是分离锁(lock striping)。  
+> （摘自《Java并发编程实践》）  
+
+  `ConcurrentHashMap`类图  
+![alt text](../img/ConcurrentHashMap类图.jpg "类图")  
+> 其中要注意，`putIfAbsent`方法返回值的处理，参见[ConcurrentMap.putIfAbsent(key,value) 用法讨论][6]  
+
+  `ConcurrentHashMap`结构图  
+![alt text](../img/ConcurrentHashMap结构图.jpg "类图") 
 底层数据结构：`Segment`数组（用于分段加锁），其中每一个`Segment`相当于一个`HashMap`，包含一个存放`key-value`的数组`HashEntry`。  
   
 默认参数：`loadFactor`=0.75，`concurrencyLevel`=16（用于确定`Segment`数组大小），`initialCapacity`=16（与`concurrencyLevel`一起确定每一个`Segment`中`HashEntry`数组大小）。  
@@ -844,7 +873,7 @@ public ConcurrentHashMap(int initialCapacity,
   
 > 图示
   
-<center>![img txt](../img/Java一二05.png "ConcurrentHashMap")</center>
+![img txt](../img/Java一二05.png "ConcurrentHashMap")
   
 重点介绍`put`操作：首先根据`key`两次`hash`（对`key.hashCode()`再`hash`），然后根据`hash`值确定`Segment`数组下标，如果对应数组元素不存在，则在`ensureSegment()`中根据模板创建；最后调用`Segment`插入操作。  
 > 源码
@@ -1011,7 +1040,7 @@ public int size() {
 }
 ```
   
-#### <a name="JC.14">14.CopyOnWriteArrayList</a>
+### <a name="JC.14">14.CopyOnWriteArrayList</a>
 读时不加锁，写时写入副本，写完切换数组引用。  
   
 底层数据结构：Object[]。  
@@ -1096,7 +1125,7 @@ private E get(Object[] a, int index) {
 }
 ```
   
-#### <a name="JC.15">15.CopyOnWriteArraySet</a>
+### <a name="JC.15">15.CopyOnWriteArraySet</a>
 基于对`CopyOnWriteArrayList`的封装。  
 > 源码
   
@@ -1143,7 +1172,7 @@ public boolean addIfAbsent(E e) {
 }
 ```
   
-#### <a name="JC.16">16.ArrayBlockingQueue</a>
+### <a name="JC.16">16.ArrayBlockingQueue</a>
 底层数据结构：Object[]，双指针`putIndex`、`takeIndex`（循环递增），先进先出，线程安全。  
 > 源码
   
@@ -1275,7 +1304,7 @@ public E take() throws InterruptedException {
 }
 ```
   
-#### <a name="JC.17">17.LinkedBlockingQueue</a>
+### <a name="JC.17">17.LinkedBlockingQueue</a>
 底层数据结构：单向链表，头指针，尾指针，入队锁（用于入队操作加锁），出队锁（用于出队操作加锁）。  
 > 源码
   
