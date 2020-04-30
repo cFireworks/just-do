@@ -20,7 +20,7 @@ recording...
 4. 网络编程
 
 ### Python语言
-1. [基础语法](./post/Python/Python基础.md)
+1. [基础语法](./post/Python/python基础.md)
 2. 数据结构
 3. 内存管理
 4. 并发编程
