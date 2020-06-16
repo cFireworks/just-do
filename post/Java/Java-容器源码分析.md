@@ -828,13 +828,6 @@ private static class SynchronizedMap<K,V> implements Map<K,V>, Serializable {
 > 分拆锁(lock spliting)就是若原先的程序中多处逻辑都采用同一个锁，但各个逻辑之间又相互独立，就可以拆(Spliting)为使用多个锁，每个锁守护不同的逻辑。分拆锁有时候可以被扩展，分成可大可小加锁块的集合，并且它们归属于相互独立的对象，这样的情况就是分离锁(lock striping)。  
 > （摘自《Java并发编程实践》）  
 
-  `ConcurrentHashMap`类图  
-![alt text](../img/ConcurrentHashMap类图.jpg "类图")  
-> 其中要注意，`putIfAbsent`方法返回值的处理，参见[ConcurrentMap.putIfAbsent(key,value) 用法讨论][6]  
-
-  `ConcurrentHashMap`结构图  
-![alt text](../img/ConcurrentHashMap结构图.jpg "类图") 
-
 底层数据结构：`Segment`数组（用于分段加锁），其中每一个`Segment`相当于一个`HashMap`，包含一个存放`key-value`的数组`HashEntry`。  
   
 默认参数：`loadFactor`=0.75，`concurrencyLevel`=16（用于确定`Segment`数组大小），`initialCapacity`=16（与`concurrencyLevel`一起确定每一个`Segment`中`HashEntry`数组大小）。  
@@ -873,11 +866,7 @@ public ConcurrentHashMap(int initialCapacity,
     UNSAFE.putOrderedObject(ss, SBASE, s0); // ordered write of segments[0]
     this.segments = ss;
 }
-```
-  
-> 图示
-  
-![img txt](../img/Java一二05.png "ConcurrentHashMap")
+```  
   
 重点介绍`put`操作：首先根据`key`两次`hash`（对`key.hashCode()`再`hash`），然后根据`hash`值确定`Segment`数组下标，如果对应数组元素不存在，则在`ensureSegment()`中根据模板创建；最后调用`Segment`插入操作。  
 > 源码

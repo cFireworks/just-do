@@ -149,7 +149,7 @@
 用于显示调用输出对象信息，或者`this + "string"`字符串重载`+`运算符形式，将`this`转为`String`类型（隐式调用）。  
   
 ### <a name="JO.02">hashCode()</a>
-用于`HashMap`中元素增删改查时`Key`的`Hash`操作。JDK8 的默认hashCode的计算方法是通过和当前线程有关的一个随机数+三个确定值，运用Marsaglia's xorshift scheme随机数算法得到的一个随机数，还有其余几种计算hashCode计算方式，可以通过 -XX:hashCode=4 来设置。一个类重写了equals方法，则必须重写hashCode()方法，否则基于hash的容器使用会出问题,JDK`HashMap`的`hash()`源码如下:
+用于`HashMap`中元素增删改查时`Key`的`Hash`操作。JDK8 的默认hashCode的计算方法是通过和当前线程有关的一个随机数+三个确定值，运用Marsaglia's xorshift scheme随机数算法得到的一个随机数，还有其余几种计算hashCode计算方式，可以通过 -XX:hashCode=4 来设置。一个类重写了equals方法，则必须重写hashCode()方法，因为hashCode()需要保证equals()相等的两个对象的哈希值相同，否则基于hash的容器使用会出问题,JDK`HashMap`的`hash()`源码如下:
   
 ```java
 static final int hash(Object key) {
@@ -185,6 +185,13 @@ public int indexOf(Object o) {
 }
 ```
   
+#### "=="和equals()的区别
+对于基本类型和引用类型 == 的作用效果是不同的，如下所示：
+- 基本类型：比较的是值是否相同；
+- 引用类型：比较的是引用是否相同；
+
+Object类中的`equals()`等价于==，不过许多类中的`equals()`方法会重写`equals()`，进行类型检查并作值相等判断。
+
 重写`equals()`函数是一个考点，需要注意一些细节,重写`equals()`函数
   
 ```java
