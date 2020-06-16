@@ -9,9 +9,10 @@ recording...
 ### Java语言
 1. [Java基础语法](./post/Java/Java-基础语法.md)
 2. [Java数据结构](./post/Java/Java-容器源码分析.md)
-3. [JVM虚拟机-内存管理](./post/Java/JVM-内存管理.md)
-4. [Java IO/NIO](./post/Java/Java-IO.md)
-5. [Java并发编程]
+3. [Java并发编程](./post/Java/Java并发编程.md)
+4. [JVM虚拟机-内存管理](./post/Java/JVM-内存管理.md)
+5. [Java IO/NIO](./post/Java/Java-IO.md)
+
 
 ### C++语言
 1. 基础语法
