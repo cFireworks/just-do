@@ -29,11 +29,85 @@
 | double | Double | 8个字节 |
 | void | - | - |
 
+### 封装与拆箱
+为了让基本类型也拥有对象的属性，基本类型和对应的包装类可以相互装换：
+- 由基本类型向对应的包装类转换称为装箱，例如把 int 包装成 Integer 类的对象；
+- 包装类向对应的基本类型转换称为拆箱，例如把 Integer 类的对象重新简化为 int。
+
+可以通过 Integer 类的构造方法将 int 装箱，通过 Integer 类的 intValue 方法将 Integer 拆箱。Java 1.5 之后可以自动拆箱装箱，也就是在进行基本数据类型和对应的包装类转换时，系统将自动进行。
+
+### stream流的数组转化
+> ### 一. int[ ]转化
+> ### 1.1、int[ ] 转 List< Integer >
+> ```java 
+>public static void main(String[] args) {
+>        int[] arr = { 1, 2, 3, 4, 5 };
+>       List<Integer> list = Arrays.stream(arr).boxed().collect(Collectors.toList());
+>        list.forEach(e -> System.out.print(e + " "));
+>    }
+> ```
+> - Arrays.stream(arr) 将int数组转化为IntStream
+> - boxed() 将每一个整数进行装箱，把IntStream 转换成了 Stream< Integer >
+> - collect(Collectors.toList()) 将对象流收集为集合，转化为 List< Integer >
+> ### 1.2、int[ ] 转 Integer[ ]
+> ```java
+> Integer[] integers = Arrays.stream(arr).boxed().toArray(Integer[]::new);
+> ```
+> - Arrays.stream(arr) 还是转化为流
+> - boxed() 装箱，将基本类型流转换为对象流
+> - toArray(Integer[ ]::new) 将对象流转换为对象数组
+> ### 二、Integer[ ]
+> ### 2.1、Integer[ ]转 int[ ]
+> ```java
+> int[] arr= Arrays.stream(integers).mapToInt(Integer::valueOf).toArray();
+> ```
+> - mapToInt(Integer::valueOf) 将对象流转化为基本类型流
+> - toArray() 转化为int数组
+> ### 2.2、Integer[ ]转 List<Integer>
+> ```
+> Integer[] integers = {1,2,3,4,5};
+> List<Integer> list = Arrays.asList(integers); 
+> ```
+> ### 三、List< Integer >
+> ### 3.1、List< Integer > 转 Integer[ ]
+> ```
+> Integer[] integers = list.toArray(new Integer[list.size()]);
+> ```
+> ### 3.2、List< Integer > 转 int[ ]
+> ```
+> int[] arr2 = list.stream().mapToInt(Integer::valueOf).toArray();
+> ```
+> .
 ### static关键词
 - 如果将一个字段定义为static，那么每个类只有一个这样的字段，而对于非静态的实例字段，每个对象有一个自己的副本。
 - 静态常量
 - 静态方法，static关键字修饰的方法，静态方法不是在对象上执行的方法，可以认为静态方法没有this参数，静态方法只能访问类的静态字段。
 > - 静态方法不能重写，静态方法的调用在字节码中是使用INVOKESTATIC，此方法则是直接调用方法区中静态方法，无需经过方法表，因此静态方法的执行只看静态类型，而与实际类型无关，又因为重写的方法调用看的是实际类型，所以静态方法不能被重写。
+
+### final关键词
+> ### fianl的使用场景
+> - 利用final修饰实例字段：这样的字段必须在构造对象时初始化，并且以后不能再修改这个字段。
+> - 利用final修饰类：定义类时使用final修饰，final类不允许被扩展，final类中的所有方法自动地称为final方法。String类是final类。
+> - 利用final修饰方法：类中的某个方法可以被声明为final，子类将不能覆盖这个方法。
+> - 利用final修饰方法参数：参数在方法局部作用域内不可更改。
+> ### final的内存语义
+> ### 1、final域的重排序规则
+> 1. 在构造函数内对一个final域的写入，与随后把这个被构造对象的引用赋值给一个引用变量，这两个操作之间不能重排序。
+> 2. 初次读一个包含final域的对象的引用，与随后初次读这个final域，这两个操作之间不能重排序。
+> ### 2、写final域的重排序规则
+> 写final域的重排序规则禁止把final域的写重排序到构造函数之外。这个规则的实现包含下面2个方面：
+> 1. JMM禁止编译器把final域的写重排序到构造函数之外。
+> 2. 编译器会在final域的写之后，构造函数return之前，插入一个StoreStore屏障。这个屏障禁止处理器把final域的写重排序到构造函数之外。写final域的重排序规则可以确保：在对象引用为任意线程可见之前，对象的final域已经被正确初始化过了，而普通域不具有这个保障。
+> ### 3、读final域的重排序规则
+> **读final域的重排序规则是，在一个线程中，初次读对象引用与初次读该对象包含的final域，JMM禁止处理器重排序这两个操作**（注意，这个规则仅仅针对处理器）。编译器会在读final域操作的前面插入一个LoadLoad屏障。初次读对象引用与初次读该对象包含的final域，这两个操作之间存在间接依赖关系。由于编译器遵守间接依赖关系，因此编译器不会重排序这两个操作。大多数处理器也会遵守间接依赖，也不会重排序这两个操作。但有少数处理器允许对存在间接依赖关系的操作做重排序（比如alpha处理器），这个规则就是专门用来针对这种处理器的。**读final域的重排序规则可以确保：在读一个对象的final域之前，一定会先读包含这个final域的对象的引用。**
+> ### 4、final域为引用类型
+> 对于引用类型，写final域的重排序规则对编译器和处理器增加了如下约束：在构造函数内对一个final引用的对象的成员域的写入，与随后在构造函数外把这个被构造对象的引用赋值给一个引用变量，这两个操作之间不能重排序。**这一规则确保了其他线程能读到被正确初始化的final引用对象的成员域。**
+
+### try-catch-finally的使用
+1. 不管有木有出现异常，finally块中代码都会执行；
+2. 当try和catch中有return时，finally仍然会执行；
+3. finally是在return后面的表达式运算后执行的（此时并没有返回运算后的值，而是先把要返回的值保存起来，管finally中的代码怎么样，返回的值都不会改变，任然是之前保存的值），所以函数返回值是在finally执行前确定的；
+4. finally中最好不要包含return，否则程序会提前退出，返回值不是try或catch中保存的返回值。
 
 ### StringBuffer和StringBuilder的区别
 > - StringBuffer和StringBuilder都可以用来构建字符序列。
@@ -70,42 +144,21 @@
 
 ### <a name="Title.03">三、继承</a>
 ### <a name="Title.03.1">3.1 Java Object类的公有函数</a>
+> Object类中的公有函数主要有`toString()`, `hashCode()`, `equals()`, `wait()`, `notify()`, `notifyAll()`, `getClass()`, `clone()`, `finalize()`
 ### <a name="JO.01">toString()</a>
 用于显示调用输出对象信息，或者`this + "string"`字符串重载`+`运算符形式，将`this`转为`String`类型（隐式调用）。  
   
 ### <a name="JO.02">hashCode()</a>
-用于`HashMap`中元素增删改查时`Key`的`Hash`操作。
-> JDK`HashMap`的`hash()`源码如下
+用于`HashMap`中元素增删改查时`Key`的`Hash`操作。JDK8 的默认hashCode的计算方法是通过和当前线程有关的一个随机数+三个确定值，运用Marsaglia's xorshift scheme随机数算法得到的一个随机数，还有其余几种计算hashCode计算方式，可以通过 -XX:hashCode=4 来设置。一个类重写了equals方法，则必须重写hashCode()方法，否则基于hash的容器使用会出问题,JDK`HashMap`的`hash()`源码如下:
   
 ```java
-/**
- * Retrieve object hash code and applies a supplemental hash function to the
- * result hash, which defends against poor quality hash functions.  This is
- * critical because HashMap uses power-of-two length hash tables, that
- * otherwise encounter collisions for hashCodes that do not differ
- * in lower bits. Note: Null keys always map to hash 0, thus index 0.
- */
-final int hash(Object k) {
-    int h = 0;
-    if (useAltHashing) {
-        if (k instanceof String) {
-            return sun.misc.Hashing.stringHash32((String) k);
-        }
-        h = hashSeed;
-    }
-
-    h ^= k.hashCode();
-
-    // This function ensures that hashCodes that differ only by
-    // constant multiples at each bit position have a bounded
-    // number of collisions (approximately 8 at default load factor).
-    h ^= (h >>> 20) ^ (h >>> 12);
-    return h ^ (h >>> 7) ^ (h >>> 4);
+static final int hash(Object key) {
+    int h;
+    return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
 }
 ```
   
-重写`hashCode()`函数是一个考点，需要注意一些细节。  
-> 重写`hashCode()`函数
+重写`hashCode()`函数是一个考点，需要注意一些细节。重写`hashCode()`函数
   
 ```java
 public int hashCode() {
@@ -115,17 +168,9 @@ public int hashCode() {
 ```
   
 ### <a name="JO.03">equals()</a>
-用于对象相等测试，比如容器`indexOf()`、`remove()`、`contains()`等函数中。  
-> JDK`ArrayList`的`indexOf()`源码如下
+用于对象相等测试，比如容器`indexOf()`、`remove()`、`contains()`等函数中,JDK`ArrayList`的`indexOf()`源码如下
   
 ```java
-/**
- * Returns the index of the first occurrence of the specified element
- * in this list, or -1 if this list does not contain the element.
- * More formally, returns the lowest index <tt>i</tt> such that
- * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
- * or -1 if there is no such index.
- */
 public int indexOf(Object o) {
     if (o == null) {
         for (int i = 0; i < size; i++)
@@ -140,8 +185,7 @@ public int indexOf(Object o) {
 }
 ```
   
-重写`equals()`函数是一个考点，需要注意一些细节。  
-> 重写`equals()`函数
+重写`equals()`函数是一个考点，需要注意一些细节,重写`equals()`函数
   
 ```java
 public boolean equals(Object o) {
